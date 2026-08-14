@@ -25,6 +25,29 @@ static void Sys_Init(int baud)
 void Main(void)
 {
 	Sys_Init(115200);
+	printf("\nStart\n");
+
+    Key_ISR_Enable(1);
+	Uart2_RX_Interrupt_Enable(1);
+	TIM4_Interrupt_Enable(1, 0, 1000);
+
+    TIM5_Out_Init();
+	MOTOR_Init();
+
+	dht11_main();
+
+	for(;;)
+	{
+        Handler();
+		State_Management();
+	}
+}
+#endif
+
+#if 0
+void Main(void)
+{
+	Sys_Init(115200);
 	printf("\nMotor Test\n");
 
     Key_ISR_Enable(1);

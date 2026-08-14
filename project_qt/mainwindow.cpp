@@ -74,15 +74,22 @@ void MainWindow::readData()
 
         qDebug() << "Received:" << strData;
 
-        ui->lblTemp->setText(strData);
-
-        // 예: $25.4,1024 형태로 들어올 경우 파싱 처리
+        // '$'로 시작하는 정상 패킷인지 확인
         if (strData.startsWith("$")) {
-            QString cleanData = strData.mid(1);
+            QString cleanData = strData.mid(1); // 앞의 '$' 제거
             QStringList tokens = cleanData.split(",");
+
             if (tokens.size() >= 2) {
-                ui->lblTemp->setText("Temp: " + tokens[0]);
-                ui->lblAdc->setText("ADC: " + tokens[1]);
+                // 1. 에러 패킷이 들어온 경우 ($ERR,에러종류)
+                if (tokens[0] == "ERR") {
+                    ui->lblTemp->setText("Temp: Error");
+                    ui->lblAdc->setText("Humi: " + tokens[1]);
+                }
+                // 2. 정상 온습도 데이터가 들어온 경우 ($온도,습도)
+                else {
+                    ui->lblTemp->setText("Temp: " + tokens[0] + " ℃");
+                    ui->lblAdc->setText("Humi: " + tokens[1] + " %");
+                }
             }
         }
     }

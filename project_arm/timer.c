@@ -88,6 +88,32 @@ void TIM2_Delay(int time)
 
 #endif
 
+void TIM4_Delay_Us(int time_us)
+{
+    // TIM4 클록 활성화
+    Macro_Set_Bit(RCC->APB1ENR, 2);
+
+    // Down-counter, Repeat mode 설정
+    TIM4->CR1 = (1<<4)|(1<<3);
+
+    // 프리스케일러 설정
+    TIM4->PSC = (unsigned int)(TIMXCLK/(double)1000000 + 0.5)-1;
+
+    // 설정한 us에 맞는 ARR 값 설정 (1ms 펄스 수 / 1000 = 1us 펄스 수)
+    TIM4->ARR = time_us - 1;
+
+    // 레지스터 업데이트 및 상태 플래그 클리어
+    Macro_Set_Bit(TIM4->EGR, 0);
+    Macro_Clear_Bit(TIM4->SR, 0);
+
+    // TIM4 인터럽트 활성화
+    Macro_Set_Bit(TIM4->DIER, 0);
+    NVIC_EnableIRQ(30);
+
+    // TIM4 카운터 시작
+    Macro_Set_Bit(TIM4->CR1, 0);
+}
+
 void TIM4_Repeat(int time)
 {
 	Macro_Set_Bit(RCC->APB1ENR, 2);

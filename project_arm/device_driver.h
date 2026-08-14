@@ -47,6 +47,7 @@ extern void Key_ISR_Enable(int en);
 extern void TIM2_Delay(int time);
 extern void TIM2_Stopwatch_Start(void);
 extern unsigned int TIM2_Stopwatch_Stop(void);
+extern void TIM4_Delay_Us(int time_us);
 extern void TIM4_Repeat(int time);
 extern int TIM4_Check_Timeout(void);
 extern void TIM4_Stop(void);
@@ -66,6 +67,10 @@ extern void MOTOR_Init(void);
 extern void MOTOR_Stop(void);
 extern void MOTOR_CW(void);
 extern void MOTOR_CCW(void);
+
+// DHT11.c
+
+void dht11_main(void);
 
 // Handler.c
 
@@ -89,6 +94,14 @@ typedef enum {
     CW,
     CCW,
 } Motor_State_t;
+
+typedef enum
+{
+    OK, 
+    STARTUP_TIMEOUT, 
+    DATA_TIMEOUT, 
+    CHECKSUM_ERROR
+} state_t;
 
 extern Motor_State_t prev_motor_state;
 extern Motor_State_t cur_motor_state;
