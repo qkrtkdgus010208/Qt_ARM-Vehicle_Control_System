@@ -51,6 +51,20 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
+# Compiled Object Files
+*.o
+
+# Output Binary Files
+*.elf
+*.bin
+*.hex
+*.map
+
+# Temporary Dump & Log Files
+__dump.txt
+__dump_all.txt
+*.dump
+
 # debug information files
 *.dwo
 
