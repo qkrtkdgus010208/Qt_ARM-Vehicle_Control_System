@@ -67,13 +67,14 @@ void UART_Handler(void)
         cur_motor_speed = value;
         break;
 
-    case 'A': // 입력 범위 제한 (0 ~ 180도)
-        if (value < 0)
-            value = 0;
-        if (value > 180)
-            value = 180;
-        // 0도 -> 35, 90도 -> 85, 180도 -> 135 변환 공식
-        cur_servo_motor_speed = 35 + ((value * 100) / 180);
+    case 'A': // 입력 범위 제한 (-90 ~ +90도)
+        if (value < -90)
+            value = -90;
+        if (value > 90)
+            value = 90;
+
+        // -90도 -> 135, 0도 -> 85, +90도 -> 35 변환 공식
+        cur_servo_motor_speed = 85 - ((value * 100) / 180);
         break;
 
     default:

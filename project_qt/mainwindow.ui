@@ -630,6 +630,9 @@ font-weight: bold;</string>
       </property>
      </widget>
      <widget class="SpeedDial" name="dialSpeed">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
       <property name="geometry">
        <rect>
         <x>50</x>

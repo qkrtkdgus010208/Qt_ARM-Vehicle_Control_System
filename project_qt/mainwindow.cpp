@@ -12,8 +12,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(ui->dialSteering,&QDial::valueChanged,this,&MainWindow::steeringChanged);
 
-    connect(steeringTimer,&QTimer::timeout,this,&MainWindow::sendSteering);
-
     serial = new QSerialPort(this);
     serial_connect();
     connect(serial,&QSerialPort::readyRead,this,&MainWindow::readSerialData);
@@ -25,7 +23,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(camera_thread, SIGNAL(send_image(const QImage&)),
             this, SLOT(handle_data(const QImage&)));
 
-    ui->dialSteering->setRange(-90,90);
+    ui->dialSteering->setRange(-90, 90);
     ui->dialSteering->setValue(0);
     ui->dialSteering->setWrapping(false);
 
@@ -54,6 +52,8 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete ui;
+    delete serial;
+    delete camera_thread;
 }
 void MainWindow::on_btnDrive_clicked()
 {
@@ -77,15 +77,14 @@ void MainWindow::on_btnDrive_clicked()
     }
 
     // 기어 변경
-    currentGear = 'D';
-
+    currentGear = 'F';
+    qDebug() << currentGear;
     ui->btnNeutral->setChecked(false);
     ui->btnReverse->setChecked(false);
 
-    if (serial->isOpen()&&ui->btnDrive->isChecked())
-    {
-        serial->write("!GEAR,D#\n");
-        qDebug() << "GEAR : D";
+    if (serial->isOpen()) {
+        QString cmd = QString("D%1\n").arg(currentGear); // 예: "DF\n"
+        serial->write(cmd.toUtf8());
     }
 }
 
@@ -99,17 +98,16 @@ void MainWindow::on_btnNeutral_clicked()
     if(!serial->isOpen())
         return;
 
-    else if (serial->isOpen()&&ui->btnNeutral->isChecked())
-    {
-        serial->write("!GEAR,N#\n");
-        qDebug() << "GEAR : N";
+    if (serial->isOpen()) {
+        QString cmd = QString("D%1\n").arg(currentGear); // 예: "DF\n"
+        serial->write(cmd.toUtf8());
     }
 }
 
 void MainWindow::on_btnReverse_clicked()
 {
     // 현재 D인데 바로 R로 바꾸려고 하는 경우
-    if (currentGear == 'D')
+    if (currentGear == 'F')
     {
         // 속도가 0이 아니면 변경 금지
         if (currentSpeed != 0)
@@ -131,12 +129,10 @@ void MainWindow::on_btnReverse_clicked()
     ui->btnDrive->setChecked(false);
     ui->btnNeutral->setChecked(false);
 
-    if (serial->isOpen()&&ui->btnReverse->isChecked())
-    {
-        serial->write("!GEAR,R#\n");
-        qDebug() << "GEAR : R";
+    if (serial->isOpen()) {
+        QString cmd = QString("D%1\n").arg(currentGear); // 예: "DF\n"
+        serial->write(cmd.toUtf8());
     }
-
 }
 
 void MainWindow::on_btnhazards_toggled(bool checked)
@@ -179,10 +175,9 @@ void MainWindow::on_btnRight_toggled(bool checked)
 
 void MainWindow::on_slidespeed_sliderReleased()
 {
-
     if(serial->isOpen())
     {
-        QString data =QString("!SPEED,%1#\n").arg(speedvalue);
+        QString data = QString("S%1\n").arg(speedvalue); // 예: "S90\n"
         maxSpeed = qMax(maxSpeed, speedvalue);
 
         speedSum += speedvalue;
@@ -204,24 +199,21 @@ void MainWindow::on_slidespeed_valueChanged(int value)
 void MainWindow::on_dialSpeed_valueChanged(int value)
 {
     currentSpeed = value;
+    speedvalue = value;
     ui->slidespeed->setValue(value);
     ui->lblSpeed->setText(QString("%1").arg(value));
 }
 
-void MainWindow::sendSteering()
+void MainWindow::steeringChanged(int value)
 {
+    steeringvalue = value;
 
-    if(serial->isOpen())
-    {
-        QString data =QString("!STEER,%1#\n").arg(steeringvalue);
+    if (serial->isOpen()) {
+        QString data = QString("A%1\n").arg(steeringvalue); // 예: "A50\n"
         serial->write(data.toUtf8());
 
         qDebug() << "STEER TX :" << data;
     }
-}
-void MainWindow::steeringChanged(int value)
-{
-    steeringvalue = value;
 }
 
 void MainWindow::on_btnStart_clicked()
@@ -253,7 +245,7 @@ void MainWindow::on_btnStart_clicked()
         ui->btnLeft->setEnabled(true);
         ui->btnRight->setEnabled(true);
         ui->slidespeed->setEnabled(true);
-        ui->dialSpeed->setEnabled(true);
+        ui->dialSpeed->setEnabled(false);
         ui->dialSteering->setEnabled(true);
         ui->btnhazards->setEnabled(true);
         ui->btnKlaxon->setEnabled(true);

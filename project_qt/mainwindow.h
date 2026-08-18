@@ -59,8 +59,6 @@ private slots:
 
     void steeringChanged(int value);
 
-    void sendSteering();
-
 private:
     Ui::MainWindow *ui;
     QSerialPort *serial;
@@ -78,9 +76,9 @@ private:
 
     int maxSpeed = 0;
     int speedSum = 0;
-    int speedCount =0;
+    int speedCount = 0;
 
-    int leftCount =0;
+    int leftCount = 0;
     int rightCount = 0;
 
     QDateTime startTime;
