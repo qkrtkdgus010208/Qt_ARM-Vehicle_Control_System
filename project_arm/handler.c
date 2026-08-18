@@ -7,6 +7,7 @@ void Handler(void)
 {
     Key_Handler();
     UART_Handler();
+    Timer_Handler();
 }
 
 void Key_Handler(void)
@@ -75,5 +76,14 @@ void UART_Handler(void)
     else if (c == '1')
     {
         LED_On();
+    }
+}
+
+void Timer_Handler()
+{
+    if (TIM4_Expired)
+    {
+        TIM4_Expired = 0;
+        dht11_main();
     }
 }

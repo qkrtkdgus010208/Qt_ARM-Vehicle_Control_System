@@ -177,7 +177,6 @@ void TIM4_Interrupt_Enable(int en, int oneshot, int time)
 		// TIM4 Start
 		Macro_Set_Bit(TIM4->CR1, 0);
 	}
-
 	else
 	{
 		NVIC_DisableIRQ(30);

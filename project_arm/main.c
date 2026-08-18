@@ -34,8 +34,6 @@ void Main(void)
     TIM5_Out_Init();
 	MOTOR_Init();
 
-	dht11_main();
-
 	for(;;)
 	{
         Handler();

@@ -30,7 +30,7 @@ void dht11_main(void)
 
     // --- 1.3 high 최소 20 ~ 40us
     Macro_Set_Bit(GPIOA->ODR, 0U);                 // Pin 0: High
-    TIM4_Delay_Us(30);
+    SysTick_Delay_Us(30);
 
     // 2. start signal 응답 check (Input Mode: MODER [1:0] -> 00)
     Macro_Write_Block(GPIOA->MODER, 0x3, 0x0, 0U); // Pin 0: Input Mode (00)
@@ -38,7 +38,7 @@ void dht11_main(void)
     // 2.1 DHT11이 low로 응답하는지 check (최대 100us 대기)
     while (GPIOA->IDR & (1 << 0))
     {
-        TIM4_Delay_Us(1);
+        SysTick_Delay_Us(1);
         if (++us_counter > 100) { state = STARTUP_TIMEOUT; break; }
     }
 
@@ -48,7 +48,7 @@ void dht11_main(void)
         us_counter = 0;
         while (!(GPIOA->IDR & (1 << 0)))
         {
-            TIM4_Delay_Us(1);
+            SysTick_Delay_Us(1);
             if (++us_counter > 100) { state = STARTUP_TIMEOUT; break; }
         }
     }
@@ -59,7 +59,7 @@ void dht11_main(void)
         us_counter = 0;
         while (GPIOA->IDR & (1 << 0))
         {
-            TIM4_Delay_Us(1);
+            SysTick_Delay_Us(1);
             if (++us_counter > 100) { state = STARTUP_TIMEOUT; break; }
         }
     }
@@ -81,7 +81,7 @@ void dht11_main(void)
                 us_counter = 0;
                 while (!(GPIOA->IDR & (1 << 0)))
                 {
-                    TIM4_Delay_Us(1);
+                    SysTick_Delay_Us(1);
                     if (++us_counter > 100) { state = DATA_TIMEOUT; break; }
                 }
 
@@ -89,7 +89,7 @@ void dht11_main(void)
                 us_counter = 0;
                 while (GPIOA->IDR & (1 << 0))
                 {
-                    TIM4_Delay_Us(1);
+                    SysTick_Delay_Us(1);
                     if (++us_counter > 100) { state = DATA_TIMEOUT; break; }
                 }
 

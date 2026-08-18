@@ -23,6 +23,8 @@ extern int SysTick_Check_Timeout(void);
 extern unsigned int SysTick_Get_Time(void);
 extern unsigned int SysTick_Get_Load_Time(void);
 extern void SysTick_Stop(void);
+extern void SysTick_Delay_Us(unsigned int usec);
+extern void SysTick_Delay_Ms(unsigned int msec);
 
 // Led.c
 
@@ -77,6 +79,7 @@ void dht11_main(void);
 extern void Handler(void);
 extern void Key_Handler(void);
 extern void UART_Handler(void);
+extern void Timer_Handler(void);
 
 // state_manager.c
 
