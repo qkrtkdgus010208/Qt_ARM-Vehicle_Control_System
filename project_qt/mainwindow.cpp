@@ -15,13 +15,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(steeringTimer,&QTimer::timeout,this,&MainWindow::sendSteering);
 
     serial = new QSerialPort(this);
-
-    serial->setPortName("COM4");
-    serial->setBaudRate(QSerialPort::Baud115200);
-    serial->setDataBits(QSerialPort::Data8);
-    serial->setParity(QSerialPort::NoParity);
-    serial->setStopBits(QSerialPort::OneStop);
-    serial->setFlowControl(QSerialPort::NoFlowControl);
+    serial_connect();
     connect(serial,&QSerialPort::readyRead,this,&MainWindow::readSerialData);
 
     // 1. 백그라운드에서 카메라를 구동할 스레드 객체 생성
@@ -313,38 +307,28 @@ void MainWindow::on_btnStop_clicked()
 
 void MainWindow::readSerialData()
 {
-    rxBuffer += serial->readAll();
+    while (serial->canReadLine()) {
+        QByteArray line = serial->readLine().trimmed();
+        QString strData = QString::fromUtf8(line);
 
-    while (rxBuffer.contains('#'))
-    {
-        int index = rxBuffer.indexOf('#');
+        qDebug() << "Received:" << strData;
 
-        QByteArray packet =rxBuffer.left(index + 1);
+        // '$'로 시작하는 정상 패킷인지 확인
+        if (strData.startsWith("$")) {
+            QString cleanData = strData.mid(1); // 앞의 '$' 제거
+            QStringList tokens = cleanData.split(",");
 
-        rxBuffer.remove(0, index + 1);
-
-        QString data =QString::fromUtf8(packet);
-
-        qDebug() << "RX :" << data;
-
-        if (data.startsWith("!SENSOR,"))
-        {
-            data.remove("!SENSOR,");
-            data.remove("#");
-
-            QStringList list = data.split(',');
-
-            if (list.size() == 2)
-            {
-                int temp = list[0].toInt();
-                int humi = list[1].toInt();
-
-                ui->lblTemp->setText(QString("%1 °C").arg(temp));
-
-                ui->lblHumidity->setText(QString("%1 %").arg(humi));
-
-                currentHumidity = humi;
-                currentTemp = temp;
+            if (tokens.size() >= 2) {
+                // 1. 에러 패킷이 들어온 경우 ($ERR,에러종류)
+                if (tokens[0] == "ERR") {
+                    ui->lblTemp->setText("Temp: Error");
+                    ui->lblHumidity->setText("Humi: Error");
+                }
+                // 2. 정상 온습도 데이터가 들어온 경우 ($온도,습도)
+                else {
+                    ui->lblTemp->setText(QString("%1 °C").arg(tokens[0]));
+                    ui->lblHumidity->setText(QString("%1 %").arg(tokens[1]));
+                }
             }
         }
     }
@@ -381,5 +365,22 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 
     // 창 닫기 이벤트를 수락하여 프로그램을 최종적으로 종료시킴
     event->accept();
+}
+
+void MainWindow::serial_connect(void)
+{
+    const auto portList = QSerialPortInfo::availablePorts();
+    if (portList.isEmpty()) {
+        qDebug() << "연결 가능한 시리얼 포트가 없습니다.";
+        return;
+    }
+
+    QString targetPort = portList.first().portName(); // 감지된 첫 번째 유효 포트 선택
+    serial->setPortName(targetPort);
+    serial->setBaudRate(QSerialPort::Baud115200);
+    serial->setDataBits(QSerialPort::Data8);
+    serial->setParity(QSerialPort::NoParity);
+    serial->setStopBits(QSerialPort::OneStop);
+    serial->setFlowControl(QSerialPort::NoFlowControl);
 }
 

@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QSerialPort>
+#include <QSerialPortInfo>
 #include <QDebug>
 #include <QTimer>
 #include <QMessageBox>
@@ -25,6 +26,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow() override;
+
 private slots:
 
     void on_btnDrive_clicked();
@@ -86,5 +88,7 @@ private:
 
     int currentTemp = 0;
     int currentHumidity = 0;
+
+    void serial_connect(void);
 };
 #endif // MAINWINDOW_H
