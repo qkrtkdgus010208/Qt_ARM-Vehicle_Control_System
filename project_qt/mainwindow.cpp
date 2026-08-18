@@ -26,29 +26,29 @@ MainWindow::MainWindow(QWidget *parent)
             this, SLOT(handle_data(const QImage&)));
 
     ui->dialSteering->setRange(-90,90);
-        ui->dialSteering->setValue(0);
-        ui->dialSteering->setWrapping(false);
+    ui->dialSteering->setValue(0);
+    ui->dialSteering->setWrapping(false);
 
-        connect(ui->dialSteering,
-                &QDial::valueChanged,
-                this,
-                [this](int value)
-                {
-                    ui->steeringWheel->setAngle(value * 1.7);
-                });
+    connect(ui->dialSteering,
+            &QDial::valueChanged,
+            this,
+            [this](int value)
+    {
+        ui->steeringWheel->setAngle(value * 1.7);
+    });
 
-        ui->steeringWheel->setAngle(0);
+    ui->steeringWheel->setAngle(0);
 
-        ui->btnDrive->setEnabled(false);
-        ui->btnNeutral->setEnabled(false);
-        ui->btnReverse->setEnabled(false);
-        ui->btnLeft->setEnabled(false);
-        ui->btnRight->setEnabled(false);
-        ui->slidespeed->setEnabled(false);
-        ui->dialSpeed->setEnabled(false);
-        ui->dialSteering->setEnabled(false);
-        ui->btnhazards->setEnabled(false);
-        ui->btnKlaxon->setEnabled(false);
+    ui->btnDrive->setEnabled(false);
+    ui->btnNeutral->setEnabled(false);
+    ui->btnReverse->setEnabled(false);
+    ui->btnLeft->setEnabled(false);
+    ui->btnRight->setEnabled(false);
+    ui->slidespeed->setEnabled(false);
+    ui->dialSpeed->setEnabled(false);
+    ui->dialSteering->setEnabled(false);
+    ui->btnhazards->setEnabled(false);
+    ui->btnKlaxon->setEnabled(false);
 }
 
 MainWindow::~MainWindow()
@@ -67,10 +67,10 @@ void MainWindow::on_btnDrive_clicked()
             ui->btnReverse->setChecked(true);
 
             QMessageBox::warning(
-                this,
-                "기어 변경 불가",
-                "차량이 정지한 후 D 기어로 변경해주세요."
-            );
+                        this,
+                        "기어 변경 불가",
+                        "차량이 정지한 후 D 기어로 변경해주세요."
+                        );
 
             return;
         }
@@ -97,7 +97,7 @@ void MainWindow::on_btnNeutral_clicked()
     ui->btnDrive->setChecked(false);
 
     if(!serial->isOpen())
-           return;
+        return;
 
     else if (serial->isOpen()&&ui->btnNeutral->isChecked())
     {
@@ -117,10 +117,10 @@ void MainWindow::on_btnReverse_clicked()
             ui->btnReverse->setChecked(false);
             ui->btnDrive->setChecked(true);
             QMessageBox::warning(
-                this,
-                "기어 변경 불가",
-                "차량이 정지한 후 R 기어로 변경해주세요."
-            );
+                        this,
+                        "기어 변경 불가",
+                        "차량이 정지한 후 R 기어로 변경해주세요."
+                        );
 
             return;
         }
@@ -181,16 +181,16 @@ void MainWindow::on_slidespeed_sliderReleased()
 {
 
     if(serial->isOpen())
-       {
-           QString data =QString("!SPEED,%1#\n").arg(speedvalue);
-           maxSpeed = qMax(maxSpeed, speedvalue);
+    {
+        QString data =QString("!SPEED,%1#\n").arg(speedvalue);
+        maxSpeed = qMax(maxSpeed, speedvalue);
 
-           speedSum += speedvalue;
-           speedCount++;
-           serial->write(data.toUtf8());
+        speedSum += speedvalue;
+        speedCount++;
+        serial->write(data.toUtf8());
 
-           qDebug() << "SPEED TX :" << data;
-       }
+        qDebug() << "SPEED TX :" << data;
+    }
 }
 
 void MainWindow::on_slidespeed_valueChanged(int value)
@@ -305,39 +305,39 @@ void MainWindow::on_btnStop_clicked()
         qint64 seconds =
                 startTime.secsTo(endTime);
 
-            int hour = seconds / 3600;
-            int min = (seconds % 3600) / 60;
-            int sec = seconds % 60;
+        int hour = seconds / 3600;
+        int min = (seconds % 3600) / 60;
+        int sec = seconds % 60;
 
-            QString driveTime =
+        QString driveTime =
                 QString("%1:%2:%3")
-                    .arg(hour, 2, 10, QChar('0'))
-                    .arg(min, 2, 10, QChar('0'))
-                    .arg(sec, 2, 10, QChar('0'));
+                .arg(hour, 2, 10, QChar('0'))
+                .arg(min, 2, 10, QChar('0'))
+                .arg(sec, 2, 10, QChar('0'));
 
-            double avgSpeed = 0;
+        double avgSpeed = 0;
 
-            if(speedCount > 0)
-            {
-                avgSpeed =
+        if(speedCount > 0)
+        {
+            avgSpeed =
                     (double)speedSum / speedCount;
-            }
+        }
 
-            DriveLog dlg(this);
+        DriveLog dlg(this);
 
-            dlg.setDriveLog(
-                startTime.toString("hh:mm:ss"),
-                endTime.toString("hh:mm:ss"),
-                driveTime,
-                maxSpeed,
-                avgSpeed,
-                leftCount,
-                rightCount,
-                currentTemp,
-                currentHumidity
-            );
+        dlg.setDriveLog(
+                    startTime.toString("hh:mm:ss"),
+                    endTime.toString("hh:mm:ss"),
+                    driveTime,
+                    maxSpeed,
+                    avgSpeed,
+                    leftCount,
+                    rightCount,
+                    currentTemp,
+                    currentHumidity
+                    );
 
-            dlg.exec();
+        dlg.exec();
     }
     else return;
 }
