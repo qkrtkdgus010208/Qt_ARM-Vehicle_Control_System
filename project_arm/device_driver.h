@@ -31,6 +31,10 @@ extern void SysTick_Delay_Ms(unsigned int msec);
 extern void LED_Init(void);
 extern void LED_On(void);
 extern void LED_Off(void);
+extern void LED_Left_Toggle(void);
+extern void LED_Right_Toggle(void);
+extern void LED_Emergency_Toggle(void);
+extern void LED_All_Off(void);
 
 // Clock.c
 
@@ -121,6 +125,9 @@ extern unsigned char prev_motor_speed;
 extern unsigned char cur_motor_speed;
 extern unsigned char prev_servo_motor_speed;
 extern unsigned char cur_servo_motor_speed;
+extern unsigned char LED_Left_On;
+extern unsigned char LED_Right_On;
+extern unsigned char LED_Emergency_On;
 
 extern volatile unsigned char Key_Pressed;
 extern volatile unsigned char Key_Released;

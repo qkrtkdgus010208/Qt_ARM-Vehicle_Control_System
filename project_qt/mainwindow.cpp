@@ -55,6 +55,7 @@ MainWindow::~MainWindow()
     delete serial;
     delete camera_thread;
 }
+
 void MainWindow::on_btnDrive_clicked()
 {
     // 현재 R인데 바로 D로 바꾸려고 하는 경우
@@ -139,38 +140,44 @@ void MainWindow::on_btnhazards_toggled(bool checked)
 {
     if(checked)
     {
-        serial->write("!BLINK,H,ON#\n");
         ui->btnLeft->setChecked(false);
         ui->btnRight->setChecked(false);
     }
-    else
-        serial->write("!BLINK,H,OFF#\n");
+
+    if (serial->isOpen()) {
+        QString data = QString("F%1\n").arg("E"); // 예: "FE\n"
+        serial->write(data.toUtf8());
+    }
 }
 
 void MainWindow::on_btnLeft_toggled(bool checked)
 {
     if(checked)
     {
-        serial->write("!BLINK,L,ON#\n");
         ui->btnhazards->setChecked(false);
         ui->btnRight->setChecked(false);
         leftCount++;
     }
-    else
-        serial->write("!BLINK,L,OFF#\n");
+
+    if (serial->isOpen()) {
+        QString data = QString("F%1\n").arg("L"); // 예: "FL\n"
+        serial->write(data.toUtf8());
+    }
 }
 
 void MainWindow::on_btnRight_toggled(bool checked)
 {
     if(checked)
     {
-        serial->write("!BLINK,R,ON#\n");
         ui->btnLeft->setChecked(false);
         ui->btnhazards->setChecked(false);
         rightCount++;
     }
-    else
-        serial->write("!BLINK,R,OFF#\n");
+
+    if (serial->isOpen()) {
+        QString data = QString("F%1\n").arg("R"); // 예: "FR\n"
+        serial->write(data.toUtf8());
+    }
 }
 
 void MainWindow::on_slidespeed_sliderReleased()

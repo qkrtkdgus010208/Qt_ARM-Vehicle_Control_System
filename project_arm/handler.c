@@ -77,6 +77,23 @@ void UART_Handler(void)
         cur_servo_motor_speed = 85 - ((value * 100) / 180);
         break;
 
+    case 'F': // 좌우 및 비상 깜빡이
+        if (rx_buf[1] == 'L')
+        {
+            LED_Left_On = !LED_Left_On;
+            LED_Left_Toggle();
+        }
+        else if (rx_buf[1] == 'R')
+        {
+            LED_Right_On = !LED_Right_On;
+            LED_Right_Toggle();
+        }
+        else if (rx_buf[1] == 'E')
+        {
+            LED_Emergency_On = !LED_Emergency_On;
+            LED_Emergency_Toggle();
+        }
+
     default:
         break;
     }
@@ -88,5 +105,12 @@ void Timer_Handler()
     {
         TIM4_Expired = 0;
         DHT11_Controller();
-    }
+        
+        if (LED_Left_On)
+            LED_Left_Toggle();
+        else if (LED_Right_On)
+            LED_Right_Toggle();
+        else if (LED_Emergency_On)
+            LED_Emergency_Toggle();
+    }   
 }

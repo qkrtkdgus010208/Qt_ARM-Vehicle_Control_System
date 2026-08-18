@@ -7,6 +7,9 @@ unsigned char prev_motor_speed = 1;
 unsigned char cur_motor_speed = 1;
 unsigned char prev_servo_motor_speed = START;
 unsigned char cur_servo_motor_speed = FRONT;
+unsigned char LED_Left_On = 0;
+unsigned char LED_Right_On = 0;
+unsigned char LED_Emergency_On = 0;
 
 volatile unsigned char Key_Pressed = 0;
 volatile unsigned char Key_Released = 0;
