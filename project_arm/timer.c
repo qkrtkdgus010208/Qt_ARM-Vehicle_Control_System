@@ -185,7 +185,7 @@ void TIM4_Interrupt_Enable(int en, int oneshot, int time)
 	}
 }
 
-#define TIM3_FREQ					(8000000)			// Hz
+#define TIM3_FREQ					(800000)			// Hz
 #define TIM3_TICK					(1000000/TIM3_FREQ)	// usec
 #define TIME3_PLS_OF_1ms			(1000/TIM3_TICK)
 
@@ -197,7 +197,7 @@ void TIM3_Out_Init(void)
 	Macro_Write_Block(GPIOB->MODER, 0x3, 0x2, 0);  	// PB0 => ALT
 	Macro_Write_Block(GPIOB->AFR[0], 0xf, 0x2, 0); 	// PB0 => AF02
 
-	Macro_Write_Block(TIM3->CCMR2, 0xff, 0x60, 0);
+	Macro_Write_Block(TIM3->CCMR2, 0xff, 0x68, 0);
 	TIM3->CCER = (0<<9)|(1<<8);
 }
 
@@ -210,7 +210,7 @@ void TIM3_Out_PWM_Generation(unsigned short freq, int duty)
 	TIM3->ARR = (int)((double)TIM3_FREQ / freq + 0.5) - 1;
 
 	// Duty Rate를 CCR3 설정
-	TIM3->CCR3 = TIM3->ARR * (duty / 10) / 10;
+	TIM3->CCR3 = TIM3->ARR * (duty / 10.) / 100;
 
 	// Manual Update(UG 발생)
 	Macro_Set_Bit(TIM3->EGR, 0);
@@ -260,8 +260,9 @@ void TIM5_Out_Init(void)
 
 void TIM5_Out_PWM_Generation(int duty)
 {
-	static int dt = 1;
-	if (duty > 0) dt = duty;
+	// 입력 범위 제한 (0 ~ 200)
+    if (duty < 0) duty = 0;
+    if (duty > 200) duty = 200;
 
 	// Timer 주파수가 TIM5_FREQ가 되도록 PSC 설정
 	TIM5->PSC = (unsigned int)(TIMXCLK/TIM5_FREQ + 0.5) - 1;
@@ -269,9 +270,21 @@ void TIM5_Out_PWM_Generation(int duty)
 	// 요청한 주파수가 되도록 ARR 설정
 	TIM5->ARR = (int)((double)TIM5_FREQ / 10000 + 0.5) - 1;
 
-	// Duty Rate CCR 설정
-	TIM5->CCR1 = TIM5->ARR * (45 + dt * 5) / 100;
-	TIM5->CCR2 = TIM5->ARR * (45 + dt * 5) / 100;
+	if (duty == 0)
+    {
+        // 속도 0 입력 시 완전 정지
+        TIM5->CCR1 = 0;
+        TIM5->CCR2 = 0;
+    }
+    else
+    {
+        // duty(1 ~ 200)를 듀티비 50.0% ~ 100.0%로 매핑
+        // ratio: 500(50.0%) ~ 1000(100.0%)
+        int duty_permille = 500 + ((duty * 500) / 200);
+
+        TIM5->CCR1 = (TIM5->ARR * duty_permille) / 1000;
+        TIM5->CCR2 = (TIM5->ARR * duty_permille) / 1000;
+    }
 
 	// Manual Update(UG 발생)
 	Macro_Set_Bit(TIM5->EGR, 0);

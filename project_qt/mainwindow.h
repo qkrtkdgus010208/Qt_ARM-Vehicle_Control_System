@@ -20,6 +20,8 @@ public:
 private slots:
     void on_btnConnect_clicked();
     void on_btnSend_clicked();
+    void on_btnSend_2_clicked();
+    void on_btnSend_3_clicked();
     void readData();
 
 private:

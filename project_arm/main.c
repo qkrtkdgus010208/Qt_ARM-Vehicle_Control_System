@@ -5,12 +5,16 @@ Motor_State_t prev_motor_state = STOP;
 Motor_State_t cur_motor_state = STOP;
 unsigned char prev_motor_speed = 1;
 unsigned char cur_motor_speed = 1;
+unsigned char prev_servo_motor_speed = START;
+unsigned char cur_servo_motor_speed = FRONT;
 
 volatile unsigned char Key_Pressed = 0;
 volatile unsigned char Key_Released = 0;
 volatile unsigned char Uart_Data_In = 0;
 volatile unsigned char Uart_Data = 0;
 volatile unsigned char TIM4_Expired = 0;
+char rx_buf[32];
+volatile unsigned char rx_idx = 0;
 
 static void Sys_Init(int baud) 
 {
@@ -29,9 +33,12 @@ void Main(void)
 
     Key_ISR_Enable(1);
 	Uart2_RX_Interrupt_Enable(1);
-	TIM4_Interrupt_Enable(1, 0, 1000);
+	TIM4_Interrupt_Enable(1, 0, 1000); // 온습도 센서
 
-    TIM5_Out_Init();
+	TIM3_Out_Init(); // 서보 모터
+	TIM3_Out_PWM_Generation(50, cur_servo_motor_speed);
+
+    TIM5_Out_Init(); // DC 모터
 	MOTOR_Init();
 
 	for(;;)

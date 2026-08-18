@@ -4,11 +4,11 @@
 
 #define PA4 4U
 
-void dht11_main(void)
+void DHT11_Controller(void)
 {
     // 변수 선언
     uint8_t bytes[6];
-    state_t state;
+    DHT11_State_t state;
     int us_counter;
 
     // 변수 초기화

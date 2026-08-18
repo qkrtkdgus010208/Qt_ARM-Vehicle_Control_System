@@ -57,12 +57,30 @@ void MainWindow::on_btnConnect_clicked()
 }
 
 // STM32로 데이터 송신
-void MainWindow::on_btnSend_clicked()
+void MainWindow::on_btnSend_clicked() // 방향
 {
     if (serial->isOpen()) {
-        QString cmd = ui->editCommand->text() + "\n"; // 패킷 끝 식별자 \n 추가
-        serial->write(cmd.toUtf8());
-    }
+            QString cmd = QString("D%1\n").arg(ui->editCommand->text()); // 예: "DF\n"
+            serial->write(cmd.toUtf8());
+        }
+}
+
+void MainWindow::on_btnSend_2_clicked() // 속도
+{
+    if (serial->isOpen()) {
+            // QString cmd = QString("S%1\n").arg(value); // 예: "S90\n"
+            QString cmd = QString("S%1\n").arg(ui->editCommand_2->text()); // 예: "S90\n"
+            serial->write(cmd.toUtf8());
+        }
+}
+
+void MainWindow::on_btnSend_3_clicked() // 각도
+{
+    if (serial->isOpen()) {
+            // QString cmd = QString("A%1\n").arg(value); // 예: "A50\n"
+            QString cmd = QString("A%1\n").arg(ui->editCommand_3->text()); // 예: "A50\n"
+            serial->write(cmd.toUtf8());
+        }
 }
 
 // STM32로부터 데이터 수신

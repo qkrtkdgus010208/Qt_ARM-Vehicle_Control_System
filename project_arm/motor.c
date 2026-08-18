@@ -42,6 +42,8 @@ void MOTOR_Init(void)
 	Macro_Write_Block(GPIOA->MODER, 0xF, 0x5, 0U);
 	Macro_Clear_Area(GPIOA->OTYPER, 0x3, 0U);
 	Macro_Write_Block(GPIOA->ODR, 0x3, 0x3, 0U);
+
+	TIM5_Out_PWM_Generation(0);
 }
 
 void MOTOR_Stop(void)
@@ -61,8 +63,6 @@ void MOTOR_CW(void)
 
 	Macro_Write_Block(GPIOA->MODER, 0x3, 0x2, 2U);
 	Macro_Write_Block(GPIOA->AFR[0], 0xf, 0x2, 4U);
-
-	TIM5_Out_PWM_Generation(0);
 }
 
 void MOTOR_CCW(void)
@@ -73,7 +73,5 @@ void MOTOR_CCW(void)
 	Macro_Write_Block(GPIOA->MODER, 0x3, 0x1, 2U);
 	Macro_Clear_Bit(GPIOA->OTYPER, 1U);
 	Macro_Clear_Bit(GPIOA->ODR, 1U);
-
-	TIM5_Out_PWM_Generation(0);
 }
 #endif

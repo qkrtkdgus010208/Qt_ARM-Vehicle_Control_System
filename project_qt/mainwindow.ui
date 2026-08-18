@@ -14,7 +14,7 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>40</x>
@@ -40,18 +40,22 @@
      </item>
     </layout>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>50</x>
-      <y>110</y>
+      <y>90</y>
       <width>216</width>
       <height>26</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="QLineEdit" name="editCommand"/>
+      <widget class="QLineEdit" name="editCommand">
+       <property name="placeholderText">
+        <string>방향(F,R,S)</string>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QPushButton" name="btnSend">
@@ -62,7 +66,7 @@
      </item>
     </layout>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>60</x>
@@ -79,6 +83,58 @@
       <widget class="QPushButton" name="btnConnect">
        <property name="text">
         <string>btnConnect</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="layoutWidget_2">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>120</y>
+      <width>216</width>
+      <height>26</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QLineEdit" name="editCommand_2">
+       <property name="placeholderText">
+        <string>속도(0~200)</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnSend_2">
+       <property name="text">
+        <string>btnSend</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="layoutWidget_3">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>150</y>
+      <width>216</width>
+      <height>26</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <item>
+      <widget class="QLineEdit" name="editCommand_3">
+       <property name="placeholderText">
+        <string>각도(0~180)</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnSend_3">
+       <property name="text">
+        <string>btnSend</string>
        </property>
       </widget>
      </item>

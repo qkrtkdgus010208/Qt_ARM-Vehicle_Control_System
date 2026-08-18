@@ -72,7 +72,7 @@ extern void MOTOR_CCW(void);
 
 // DHT11.c
 
-void dht11_main(void);
+void DHT11_Controller(void);
 
 // Handler.c
 
@@ -81,16 +81,18 @@ extern void Key_Handler(void);
 extern void UART_Handler(void);
 extern void Timer_Handler(void);
 
-// state_manager.c
+// State_manager.c
 
 extern void State_Management(void);
 extern void Motor_State_Management(void);
+extern void Servo_Motor_State_Management(void);
 
-// controller.c
+// Controller.c
 
 extern void Motor_Controller(void);
+extern void Servo_Motor_Controller(void);
 
-// variable
+// Variable
 
 typedef enum {
     STOP = 0,
@@ -98,21 +100,32 @@ typedef enum {
     CCW,
 } Motor_State_t;
 
+enum {
+    START = 0,
+    RIGHT = 35,
+    FRONT = 85,
+    LEFT  = 135
+};
+
 typedef enum
 {
     OK, 
     STARTUP_TIMEOUT, 
     DATA_TIMEOUT, 
     CHECKSUM_ERROR
-} state_t;
+} DHT11_State_t;
 
 extern Motor_State_t prev_motor_state;
 extern Motor_State_t cur_motor_state;
 extern unsigned char prev_motor_speed;
 extern unsigned char cur_motor_speed;
+extern unsigned char prev_servo_motor_speed;
+extern unsigned char cur_servo_motor_speed;
 
 extern volatile unsigned char Key_Pressed;
 extern volatile unsigned char Key_Released;
 extern volatile unsigned char Uart_Data_In;
 extern volatile unsigned char Uart_Data;
 extern volatile unsigned char TIM4_Expired;
+extern char rx_buf[32];
+extern volatile unsigned char rx_idx;
