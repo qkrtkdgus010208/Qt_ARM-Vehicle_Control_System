@@ -78,10 +78,10 @@ font-weight: bold;</string>
     <widget class="QFrame" name="frame_3">
      <property name="geometry">
       <rect>
-       <x>10</x>
-       <y>650</y>
-       <width>321</width>
-       <height>151</height>
+       <x>20</x>
+       <y>480</y>
+       <width>320</width>
+       <height>320</height>
       </rect>
      </property>
      <property name="styleSheet">
@@ -99,10 +99,10 @@ font-weight: bold;</string>
      <widget class="QWidget" name="layoutWidget">
       <property name="geometry">
        <rect>
-        <x>100</x>
-        <y>10</y>
-        <width>131</width>
-        <height>131</height>
+        <x>40</x>
+        <y>30</y>
+        <width>251</width>
+        <height>261</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -116,8 +116,8 @@ font-weight: bold;</string>
          </property>
          <property name="maximumSize">
           <size>
-           <width>120</width>
-           <height>60</height>
+           <width>240</width>
+           <height>120</height>
           </size>
          </property>
          <property name="styleSheet">
@@ -127,12 +127,12 @@ font-weight: bold;</string>
 
     border: 2px solid #00D9FF;
 
-    border-top-left-radius: 60px;
-    border-top-right-radius: 60px;
+    border-top-left-radius: 120px;
+    border-top-right-radius: 120px;
     border-bottom-left-radius: 0px;
     border-bottom-right-radius: 0px;
 
-    font-size: 16px;
+    font-size: 25px;
     font-weight: bold;
 }</string>
          </property>
@@ -151,8 +151,8 @@ font-weight: bold;</string>
          </property>
          <property name="maximumSize">
           <size>
-           <width>120</width>
-           <height>60</height>
+           <width>240</width>
+           <height>120</height>
           </size>
          </property>
          <property name="styleSheet">
@@ -164,10 +164,10 @@ font-weight: bold;</string>
     border-top-left-radius: 0px;
     border-top-right-radius: 0px;
 
-    border-bottom-left-radius: 60px;
-    border-bottom-right-radius: 60px;
+    border-bottom-left-radius: 120px;
+    border-bottom-right-radius: 120px;
 
-    font-size: 16px;
+    font-size: 25px;
     font-weight: bold;
 }</string>
          </property>
@@ -184,8 +184,8 @@ font-weight: bold;</string>
       <rect>
        <x>20</x>
        <y>20</y>
-       <width>321</width>
-       <height>611</height>
+       <width>320</width>
+       <height>450</height>
       </rect>
      </property>
      <property name="styleSheet">
