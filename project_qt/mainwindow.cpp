@@ -1,114 +1,385 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include <QDebug>
-#include <QMessageBox>
+#include <QPixmap>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-    , serial(new QSerialPort(this)) // 이 부분이 있어야 nullptr 에러가 나지 않습니다.
 {
     ui->setupUi(this);
 
-    // 1. PC에 연결된 시리얼 포트 목록 검색 후 콤보박스에 추가
-    const auto infos = QSerialPortInfo::availablePorts();
-    for (const QSerialPortInfo &info : infos) {
-        ui->comboPorts->addItem(info.portName());
-    }
+    steeringTimer = new QTimer(this);
 
-    // 2. 데이터 수신 시 readData() 슬롯 호출 연결
-    connect(serial, &QSerialPort::readyRead, this, &MainWindow::readData);
+    connect(ui->dialSteering,&QDial::valueChanged,this,&MainWindow::steeringChanged);
+
+    connect(steeringTimer,&QTimer::timeout,this,&MainWindow::sendSteering);
+
+    serial = new QSerialPort(this);
+
+    serial->setPortName("COM4");
+    serial->setBaudRate(QSerialPort::Baud115200);
+    serial->setDataBits(QSerialPort::Data8);
+    serial->setParity(QSerialPort::NoParity);
+    serial->setStopBits(QSerialPort::OneStop);
+    serial->setFlowControl(QSerialPort::NoFlowControl);
+    connect(serial,&QSerialPort::readyRead,this,&MainWindow::readSerialData);
+
+    // 1. 백그라운드에서 카메라를 구동할 스레드 객체 생성
+    camera_thread = new CameraThread(this);
+
+    // 2. 스레드(영상 송신)와 메인 UI(영상 수신)를 시그널-슬롯으로 연결
+    connect(camera_thread, SIGNAL(send_image(const QImage&)),
+            this, SLOT(handle_data(const QImage&)));
+
+    ui->dialSteering->setRange(-90,90);
+        ui->dialSteering->setValue(0);
+        ui->dialSteering->setWrapping(false);
+
+        connect(ui->dialSteering,
+                &QDial::valueChanged,
+                this,
+                [this](int value)
+                {
+                    ui->steeringWheel->setAngle(value * 1.7);
+                });
+
+        ui->steeringWheel->setAngle(0);
 }
 
 MainWindow::~MainWindow()
 {
-    if (serial->isOpen()) {
-        serial->close();
-    }
-
     delete ui;
 }
-
-// 연결/해제 버튼
-void MainWindow::on_btnConnect_clicked()
+void MainWindow::on_btnDrive_clicked()
 {
-    if (!serial->isOpen()) {
-        QString portName = ui->comboPorts->currentText();
-        if (portName.isEmpty()) return;
+    // 현재 R인데 바로 D로 바꾸려고 하는 경우
+    if (currentGear == 'R')
+    {
+        // 속도가 0이 아니면 변경 금지
+        if (currentSpeed != 0)
+        {
+            ui->btnDrive->setChecked(false);
+            ui->btnReverse->setChecked(true);
 
-        serial->setPortName(portName);
-        serial->setBaudRate(QSerialPort::Baud115200);
-        serial->setDataBits(QSerialPort::Data8);
-        serial->setParity(QSerialPort::NoParity);
-        serial->setStopBits(QSerialPort::OneStop);
-        serial->setFlowControl(QSerialPort::NoFlowControl);
+            QMessageBox::warning(
+                this,
+                "기어 변경 불가",
+                "차량이 정지한 후 D 기어로 변경해주세요."
+            );
 
-        if (serial->open(QIODevice::ReadWrite)) {
-            ui->btnConnect->setText("Disconnect");
-            ui->comboPorts->setEnabled(false);
-        } else {
-            QMessageBox::critical(this, "Error", "포트를 열 수 없습니다.");
+            return;
         }
-    } else {
-        serial->close();
-        ui->btnConnect->setText("Connect");
-        ui->comboPorts->setEnabled(true);
+    }
+
+    // 기어 변경
+    currentGear = 'D';
+
+    if (serial->isOpen())
+    {
+        serial->write("!GEAR,D#\n");
+    }
+
+    qDebug() << "GEAR : D";
+}
+
+void MainWindow::on_btnNeutral_clicked()
+{
+    currentGear = 'N';
+
+    if(!serial->isOpen())
+           return;
+
+    serial->write("!GEAR,N#\n");
+}
+
+void MainWindow::on_btnReverse_clicked()
+{
+    // 현재 D인데 바로 R로 바꾸려고 하는 경우
+    if (currentGear == 'D')
+    {
+        // 속도가 0이 아니면 변경 금지
+        if (currentSpeed != 0)
+        {
+            ui->btnReverse->setChecked(false);
+            ui->btnDrive->setChecked(true);
+            QMessageBox::warning(
+                this,
+                "기어 변경 불가",
+                "차량이 정지한 후 R 기어로 변경해주세요."
+            );
+
+            return;
+        }
+    }
+
+    // 기어 변경
+    currentGear = 'R';
+
+    if (serial->isOpen())
+    {
+        serial->write("!GEAR,R#\n");
+    }
+
+    qDebug() << "GEAR : R";
+}
+
+void MainWindow::on_btnhazards_toggled(bool checked)
+{
+    if(checked)
+    {
+        serial->write("!BLINK,H,ON#\n");
+    }
+    else
+        serial->write("!BLINK,H,OFF#\n");
+}
+
+void MainWindow::on_btnLeft_toggled(bool checked)
+{
+    if(checked)
+    {
+        serial->write("!BLINK,L,ON#\n");
+    }
+    else
+        serial->write("!BLINK,L,OFF#\n");
+}
+
+void MainWindow::on_btnRight_toggled(bool checked)
+{
+    if(checked)
+    {
+        serial->write("!BLINK,R,ON#\n");
+    }
+    else
+        serial->write("!BLINK,R,OFF#\n");
+}
+
+void MainWindow::on_slidespeed_sliderReleased()
+{
+
+    if(serial->isOpen())
+       {
+           QString data =QString("!SPEED,%1#\n").arg(speedvalue);
+           maxSpeed = qMax(maxSpeed, speedvalue);
+
+           speedSum += speedvalue;
+           speedCount++;
+           serial->write(data.toUtf8());
+
+           qDebug() << "SPEED TX :" << data;
+       }
+}
+
+void MainWindow::on_slidespeed_valueChanged(int value)
+{
+    currentSpeed = value;
+    speedvalue = value;
+    ui->lblSpeed->setText(QString("%1").arg(value));
+    ui->dialSpeed->setValue(value);
+}
+
+void MainWindow::on_dialSpeed_valueChanged(int value)
+{
+    currentSpeed = value;
+    ui->slidespeed->setValue(value);
+    ui->lblSpeed->setText(QString("%1").arg(value));
+}
+
+void MainWindow::sendSteering()
+{
+
+    if(serial->isOpen())
+    {
+        QString data =QString("!STEER,%1#\n").arg(steeringvalue);
+        serial->write(data.toUtf8());
+
+        qDebug() << "STEER TX :" << data;
+    }
+}
+void MainWindow::steeringChanged(int value)
+{
+    steeringvalue = value;
+}
+
+void MainWindow::on_btnStart_clicked()
+{
+    maxSpeed = 0;
+    speedSum = 0;
+    speedCount = 0;
+
+    leftCount = 0;
+    rightCount = 0;
+
+    if(serial->isOpen())
+    {
+        qDebug() << "Already connected";
+        return;
+    }
+
+    if(serial->open(QIODevice::ReadWrite))
+    {
+        startTime = QDateTime::currentDateTime();
+        qDebug() << "M4 CONNECT SUCCESS";
+        // 3. 카메라 스레드 실행 (CameraThread::run() 함수가 호출됨)
+        camera_thread->start();
+        steeringTimer->setInterval(1000);
+        steeringTimer->start();
+        ui->btnDrive->setEnabled(true);
+        ui->btnNeutral->setEnabled(true);
+        ui->btnReverse->setEnabled(true);
+        ui->btnLeft->setEnabled(true);
+        ui->btnRight->setEnabled(true);
+        ui->dialSpeed->setEnabled(true);
+    }
+    else
+    {
+        qDebug() << "M4 CONNECT FAIL";
     }
 }
 
-// STM32로 데이터 송신
-void MainWindow::on_btnSend_clicked() // 방향
+void MainWindow::on_btnStop_clicked()
 {
-    if (serial->isOpen()) {
-            QString cmd = QString("D%1\n").arg(ui->editCommand->text()); // 예: "DF\n"
-            serial->write(cmd.toUtf8());
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this, "종료 확인", "정말 종료 하시겠습니까?", QMessageBox::Yes | QMessageBox::No);
+
+    if (reply == QMessageBox::Yes)
+    {
+        if(serial->isOpen())
+        {
+            // 필요하면 연결 끊기 전에 M4에 정지 명령 전송
+            serial->write("!STOP#\n");
+
+            serial->waitForBytesWritten(100);
+
+            serial->close();
         }
+        endTime = QDateTime::currentDateTime();
+        qDebug() << "M4 DISCONNECTED";
+        steeringTimer->stop();
+
+        ui->lblSpeed->setText("0");
+        ui->dialSpeed->setValue(0);
+
+        if (camera_thread) {
+            camera_thread->quit(); // 1. 스레드의 이벤트 루프(exec())를 빠져나오도록 종료 신호를 보냄
+            camera_thread->wait(); // 2. 스레드가 완전히 종료(run() 함수가 완전히 끝날 때)될 때까지 메인 스레드가 대기
+        }
+        ui->lblCamera->setText("NO SIGNAL");
+        ui->lblREC->setText("");
+        ui->btnDrive->setEnabled(false);
+        ui->btnNeutral->setEnabled(false);
+        ui->btnReverse->setEnabled(false);
+        ui->btnLeft->setEnabled(false);
+        ui->btnRight->setEnabled(false);
+        ui->dialSpeed->setEnabled(false);
+        qint64 seconds =
+                startTime.secsTo(endTime);
+
+            int hour = seconds / 3600;
+            int min = (seconds % 3600) / 60;
+            int sec = seconds % 60;
+
+            QString driveTime =
+                QString("%1:%2:%3")
+                    .arg(hour, 2, 10, QChar('0'))
+                    .arg(min, 2, 10, QChar('0'))
+                    .arg(sec, 2, 10, QChar('0'));
+
+            double avgSpeed = 0;
+
+            if(speedCount > 0)
+            {
+                avgSpeed =
+                    (double)speedSum / speedCount;
+            }
+
+            DriveLog dlg(this);
+
+            dlg.setDriveLog(
+                startTime.toString("hh:mm:ss"),
+                endTime.toString("hh:mm:ss"),
+                driveTime,
+                maxSpeed,
+                avgSpeed,
+                leftCount,
+                rightCount,
+                currentTemp,
+                currentHumidity
+            );
+
+            dlg.exec();
+    }
+    else return;
 }
 
-void MainWindow::on_btnSend_2_clicked() // 속도
+void MainWindow::readSerialData()
 {
-    if (serial->isOpen()) {
-            // QString cmd = QString("S%1\n").arg(value); // 예: "S90\n"
-            QString cmd = QString("S%1\n").arg(ui->editCommand_2->text()); // 예: "S90\n"
-            serial->write(cmd.toUtf8());
-        }
-}
+    rxBuffer += serial->readAll();
 
-void MainWindow::on_btnSend_3_clicked() // 각도
-{
-    if (serial->isOpen()) {
-            // QString cmd = QString("A%1\n").arg(value); // 예: "A50\n"
-            QString cmd = QString("A%1\n").arg(ui->editCommand_3->text()); // 예: "A50\n"
-            serial->write(cmd.toUtf8());
-        }
-}
+    while (rxBuffer.contains('#'))
+    {
+        int index = rxBuffer.indexOf('#');
 
-// STM32로부터 데이터 수신
-void MainWindow::readData()
-{
-    while (serial->canReadLine()) {
-        QByteArray line = serial->readLine().trimmed();
-        QString strData = QString::fromUtf8(line);
+        QByteArray packet =rxBuffer.left(index + 1);
 
-        qDebug() << "Received:" << strData;
+        rxBuffer.remove(0, index + 1);
 
-        // '$'로 시작하는 정상 패킷인지 확인
-        if (strData.startsWith("$")) {
-            QString cleanData = strData.mid(1); // 앞의 '$' 제거
-            QStringList tokens = cleanData.split(",");
+        QString data =QString::fromUtf8(packet);
 
-            if (tokens.size() >= 2) {
-                // 1. 에러 패킷이 들어온 경우 ($ERR,에러종류)
-                if (tokens[0] == "ERR") {
-                    ui->lblTemp->setText("Temp: Error");
-                    ui->lblAdc->setText("Humi: " + tokens[1]);
-                }
-                // 2. 정상 온습도 데이터가 들어온 경우 ($온도,습도)
-                else {
-                    ui->lblTemp->setText("Temp: " + tokens[0] + " ℃");
-                    ui->lblAdc->setText("Humi: " + tokens[1] + " %");
-                }
+        qDebug() << "RX :" << data;
+
+        if (data.startsWith("!SENSOR,"))
+        {
+            data.remove("!SENSOR,");
+            data.remove("#");
+
+            QStringList list = data.split(',');
+
+            if (list.size() == 2)
+            {
+                int temp = list[0].toInt();
+                int humi = list[1].toInt();
+
+                ui->lblTemp->setText(QString("%1 °C").arg(temp));
+
+                ui->lblHumidity->setText(QString("%1 %").arg(humi));
+
+                currentHumidity = humi;
+                currentTemp = temp;
             }
         }
     }
 }
+
+void MainWindow::handle_data(const QImage &image) {
+    // 1. 스레드로부터 받은 QImage를 화면 출력용 클래스인 QPixmap으로 변환
+    QPixmap pixmap = QPixmap::fromImage(image);
+
+    // 2. 영상을 출력할 라벨(lblImg)이 안전하게 존재한다면 이미지를 라벨에 셋팅
+    if (serial->isOpen()) {
+        ui->lblCamera->setText("");
+        ui->lblREC->setText("● REC");
+        ui->lblREC->setStyleSheet("color: #FF3B30");
+        ui->lblREC->setStyleSheet("background-color: transparent;");
+        ui->lblCamera->setPixmap(pixmap);
+    }
+}
+
+// ============================================================================
+// 윈도우 창 닫기 이벤트 핸들러 (X 버튼을 누르거나 프로그램을 종료할 때 실행)
+// ============================================================================
+void MainWindow::closeEvent(QCloseEvent *event) {
+    // 카메라 스레드가 동작 중이라면 안전하게 종료 절차를 밟음
+    if (camera_thread) {
+        camera_thread->quit(); // 1. 스레드의 이벤트 루프(exec())를 빠져나오도록 종료 신호를 보냄
+        camera_thread->wait(); // 2. 스레드가 완전히 종료(run() 함수가 완전히 끝날 때)될 때까지 메인 스레드가 대기
+    }
+
+    if (serial->isOpen())
+    {
+        serial->close();
+    }
+
+    // 창 닫기 이벤트를 수락하여 프로그램을 최종적으로 종료시킴
+    event->accept();
+}
+
