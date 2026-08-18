@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#define PA4 4U
+
 void dht11_main(void)
 {
     // 변수 선언
@@ -20,23 +22,23 @@ void dht11_main(void)
 
     // 1. start up signal 전송
     // --- 1.1 reset DHT11 (Output Mode: MODER [1:0] -> 01, ODR Pin 0 -> 1)
-    Macro_Write_Block(GPIOA->MODER, 0x3, 0x1, 0U); // Pin 0: Output Mode (01)
-    Macro_Set_Bit(GPIOA->ODR, 0U);                 // Pin 0: High
+    Macro_Write_Block(GPIOA->MODER, 0x3, 0x1, PA4 * 2); // Pin 0: Output Mode (01)
+    Macro_Set_Bit(GPIOA->ODR, PA4);                 // Pin 0: High
     TIM2_Delay(100);
 
     // --- 1.2 low 최소 18ms
-    Macro_Clear_Bit(GPIOA->ODR, 0U);               // Pin 0: Low
+    Macro_Clear_Bit(GPIOA->ODR, PA4);               // Pin 0: Low
     TIM2_Delay(20);
 
     // --- 1.3 high 최소 20 ~ 40us
-    Macro_Set_Bit(GPIOA->ODR, 0U);                 // Pin 0: High
+    Macro_Set_Bit(GPIOA->ODR, PA4);                 // Pin 0: High
     SysTick_Delay_Us(30);
 
     // 2. start signal 응답 check (Input Mode: MODER [1:0] -> 00)
-    Macro_Write_Block(GPIOA->MODER, 0x3, 0x0, 0U); // Pin 0: Input Mode (00)
+    Macro_Write_Block(GPIOA->MODER, 0x3, 0x0, PA4 * 2); // Pin 0: Input Mode (00)
 
     // 2.1 DHT11이 low로 응답하는지 check (최대 100us 대기)
-    while (GPIOA->IDR & (1 << 0))
+    while (GPIOA->IDR & (1 << PA4))
     {
         SysTick_Delay_Us(1);
         if (++us_counter > 100) { state = STARTUP_TIMEOUT; break; }
@@ -46,7 +48,7 @@ void dht11_main(void)
     if (state == OK)
     {
         us_counter = 0;
-        while (!(GPIOA->IDR & (1 << 0)))
+        while (!(GPIOA->IDR & (1 << PA4)))
         {
             SysTick_Delay_Us(1);
             if (++us_counter > 100) { state = STARTUP_TIMEOUT; break; }
@@ -57,7 +59,7 @@ void dht11_main(void)
     if (state == OK) // 이후는 start data transmission
     {
         us_counter = 0;
-        while (GPIOA->IDR & (1 << 0))
+        while (GPIOA->IDR & (1 << PA4))
         {
             SysTick_Delay_Us(1);
             if (++us_counter > 100) { state = STARTUP_TIMEOUT; break; }
@@ -79,7 +81,7 @@ void dht11_main(void)
             {
                 // 1. low 구간 50us check
                 us_counter = 0;
-                while (!(GPIOA->IDR & (1 << 0)))
+                while (!(GPIOA->IDR & (1 << PA4)))
                 {
                     SysTick_Delay_Us(1);
                     if (++us_counter > 100) { state = DATA_TIMEOUT; break; }
@@ -87,7 +89,7 @@ void dht11_main(void)
 
                 // 2. high 구간 길이 check (0: 26 ~ 28us, 1: 70us)
                 us_counter = 0;
-                while (GPIOA->IDR & (1 << 0))
+                while (GPIOA->IDR & (1 << PA4))
                 {
                     SysTick_Delay_Us(1);
                     if (++us_counter > 100) { state = DATA_TIMEOUT; break; }

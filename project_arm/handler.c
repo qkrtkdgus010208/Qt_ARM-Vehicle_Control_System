@@ -48,26 +48,26 @@ void UART_Handler(void)
     Uart_Data_In = 0;
     char c = Uart_Data;
 
-    // if (c == 'S')
-    // {
-    //     cur_motor_state = STOP;
-    //     printf("%c\n", c);
-    // }
-    // else if (c == 'F')
-    // {
-    //     cur_motor_state = CW;
-    //     printf("%c\n", c);
-    // }
-    // else if (c == 'R')
-    // {
-    //     cur_motor_state = CCW;
-    //     printf("%c\n", c);
-    // }
-    // else if (c >= '1' && c <= '9')
-    // {
-    //     cur_motor_speed = c - '0';
-    //     printf("%c\n", c);
-    // }
+    if (c == 'S')
+    {
+        cur_motor_state = STOP;
+        printf("%c\n", c);
+    }
+    else if (c == 'F')
+    {
+        cur_motor_state = CW;
+        printf("%c\n", c);
+    }
+    else if (c == 'R')
+    {
+        cur_motor_state = CCW;
+        printf("%c\n", c);
+    }
+    else if (c >= '1' && c <= '9')
+    {
+        cur_motor_speed = c - '0';
+        printf("%c\n", c);
+    }
 
     if (c == '0')
     {
