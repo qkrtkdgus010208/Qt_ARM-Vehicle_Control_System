@@ -433,10 +433,10 @@ font-weight: bold;</string>
     <widget class="QDial" name="dialSteering">
      <property name="geometry">
       <rect>
-       <x>40</x>
-       <y>490</y>
-       <width>300</width>
-       <height>300</height>
+       <x>60</x>
+       <y>530</y>
+       <width>250</width>
+       <height>250</height>
       </rect>
      </property>
      <property name="maximum">
@@ -511,9 +511,6 @@ QPushButton:checked {
          <property name="checkable">
           <bool>true</bool>
          </property>
-         <attribute name="buttonGroup">
-          <string notr="true">buttonGroup</string>
-         </attribute>
         </widget>
        </item>
        <item>
@@ -550,9 +547,6 @@ QPushButton:checked {
          <property name="checkable">
           <bool>true</bool>
          </property>
-         <attribute name="buttonGroup">
-          <string notr="true">buttonGroup</string>
-         </attribute>
         </widget>
        </item>
        <item>
@@ -588,9 +582,6 @@ QPushButton:checked {
          <property name="checkable">
           <bool>true</bool>
          </property>
-         <attribute name="buttonGroup">
-          <string notr="true">buttonGroup</string>
-         </attribute>
         </widget>
        </item>
       </layout>
@@ -755,9 +746,6 @@ QPushButton:checked {
      <property name="checkable">
       <bool>true</bool>
      </property>
-     <attribute name="buttonGroup">
-      <string notr="true">buttonGroup_2</string>
-     </attribute>
     </widget>
     <widget class="QPushButton" name="btnRight">
      <property name="geometry">
@@ -800,25 +788,6 @@ QPushButton:checked {
      </property>
      <property name="checkable">
       <bool>true</bool>
-     </property>
-     <attribute name="buttonGroup">
-      <string notr="true">buttonGroup_2</string>
-     </attribute>
-    </widget>
-    <widget class="SteeringWheel" name="steeringWheel">
-     <property name="geometry">
-      <rect>
-       <x>40</x>
-       <y>509</y>
-       <width>300</width>
-       <height>281</height>
-      </rect>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">    background-color: #121820;</string>
-     </property>
-     <property name="text">
-      <string/>
      </property>
     </widget>
     <widget class="QPushButton" name="btnhazards">
@@ -863,9 +832,6 @@ QPushButton:checked {
      <property name="checkable">
       <bool>true</bool>
      </property>
-     <attribute name="buttonGroup">
-      <string notr="true">buttonGroup_2</string>
-     </attribute>
     </widget>
     <widget class="QPushButton" name="btnKlaxon">
      <property name="geometry">
@@ -907,9 +873,33 @@ QPushButton:checked {
       <string/>
      </property>
      <property name="checkable">
-      <bool>true</bool>
+      <bool>false</bool>
      </property>
     </widget>
+    <widget class="SteeringWheel" name="steeringWheel">
+     <property name="geometry">
+      <rect>
+       <x>60</x>
+       <y>530</y>
+       <width>250</width>
+       <height>250</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">    background-color: #121820;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <zorder>dialSteering</zorder>
+    <zorder>frame_2</zorder>
+    <zorder>frame</zorder>
+    <zorder>btnLeft</zorder>
+    <zorder>btnRight</zorder>
+    <zorder>btnhazards</zorder>
+    <zorder>steeringWheel</zorder>
+    <zorder>btnKlaxon</zorder>
    </widget>
    <widget class="QFrame" name="frameSpeed">
     <property name="geometry">
@@ -1055,8 +1045,4 @@ background-color: #121820;</string>
  </customwidgets>
  <resources/>
  <connections/>
- <buttongroups>
-  <buttongroup name="buttonGroup"/>
-  <buttongroup name="buttonGroup_2"/>
- </buttongroups>
 </ui>
