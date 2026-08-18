@@ -364,6 +364,8 @@ void MainWindow::readSerialData()
                 else {
                     ui->lblTemp->setText(QString("%1 °C").arg(tokens[0]));
                     ui->lblHumidity->setText(QString("%1 %").arg(tokens[1]));
+                    currentTemp = tokens[0].toInt();
+                    currentHumidity = tokens[1].toInt();
                 }
             }
         }

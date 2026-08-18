@@ -204,7 +204,7 @@ font-weight: bold;</string>
       <property name="geometry">
        <rect>
         <x>30</x>
-        <y>240</y>
+        <y>70</y>
         <width>241</width>
         <height>141</height>
        </rect>
@@ -274,7 +274,7 @@ padding: 12px;</string>
       <property name="geometry">
        <rect>
         <x>30</x>
-        <y>70</y>
+        <y>240</y>
         <width>241</width>
         <height>151</height>
        </rect>
