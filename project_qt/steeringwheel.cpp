@@ -5,7 +5,7 @@
 
 SteeringWheel::SteeringWheel(QWidget *parent) : QLabel(parent)
 {
-    originalPixmap.load(":/icon/image/3.png");
+    originalPixmap.load(":/icon/image/4.png");
     //originalPixmap.load(":/icon/image/handle1.png");
 
     setAlignment(Qt::AlignCenter);

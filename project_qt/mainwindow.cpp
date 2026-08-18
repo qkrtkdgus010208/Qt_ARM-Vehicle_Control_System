@@ -44,6 +44,17 @@ MainWindow::MainWindow(QWidget *parent)
                 });
 
         ui->steeringWheel->setAngle(0);
+
+        ui->btnDrive->setEnabled(false);
+        ui->btnNeutral->setEnabled(false);
+        ui->btnReverse->setEnabled(false);
+        ui->btnLeft->setEnabled(false);
+        ui->btnRight->setEnabled(false);
+        ui->slidespeed->setEnabled(false);
+        ui->dialSpeed->setEnabled(false);
+        ui->dialSteering->setEnabled(false);
+        ui->btnhazards->setEnabled(false);
+        ui->btnKlaxon->setEnabled(false);
 }
 
 MainWindow::~MainWindow()
@@ -74,22 +85,31 @@ void MainWindow::on_btnDrive_clicked()
     // 기어 변경
     currentGear = 'D';
 
-    if (serial->isOpen())
+    ui->btnNeutral->setChecked(false);
+    ui->btnReverse->setChecked(false);
+
+    if (serial->isOpen()&&ui->btnDrive->isChecked())
     {
         serial->write("!GEAR,D#\n");
+        qDebug() << "GEAR : D";
     }
-
-    qDebug() << "GEAR : D";
 }
 
 void MainWindow::on_btnNeutral_clicked()
 {
     currentGear = 'N';
 
+    ui->btnReverse->setChecked(false);
+    ui->btnDrive->setChecked(false);
+
     if(!serial->isOpen())
            return;
 
-    serial->write("!GEAR,N#\n");
+    else if (serial->isOpen()&&ui->btnNeutral->isChecked())
+    {
+        serial->write("!GEAR,N#\n");
+        qDebug() << "GEAR : N";
+    }
 }
 
 void MainWindow::on_btnReverse_clicked()
@@ -114,13 +134,15 @@ void MainWindow::on_btnReverse_clicked()
 
     // 기어 변경
     currentGear = 'R';
+    ui->btnDrive->setChecked(false);
+    ui->btnNeutral->setChecked(false);
 
-    if (serial->isOpen())
+    if (serial->isOpen()&&ui->btnReverse->isChecked())
     {
         serial->write("!GEAR,R#\n");
+        qDebug() << "GEAR : R";
     }
 
-    qDebug() << "GEAR : R";
 }
 
 void MainWindow::on_btnhazards_toggled(bool checked)
@@ -128,6 +150,8 @@ void MainWindow::on_btnhazards_toggled(bool checked)
     if(checked)
     {
         serial->write("!BLINK,H,ON#\n");
+        ui->btnLeft->setChecked(false);
+        ui->btnRight->setChecked(false);
     }
     else
         serial->write("!BLINK,H,OFF#\n");
@@ -138,6 +162,9 @@ void MainWindow::on_btnLeft_toggled(bool checked)
     if(checked)
     {
         serial->write("!BLINK,L,ON#\n");
+        ui->btnhazards->setChecked(false);
+        ui->btnRight->setChecked(false);
+        leftCount++;
     }
     else
         serial->write("!BLINK,L,OFF#\n");
@@ -148,6 +175,9 @@ void MainWindow::on_btnRight_toggled(bool checked)
     if(checked)
     {
         serial->write("!BLINK,R,ON#\n");
+        ui->btnLeft->setChecked(false);
+        ui->btnhazards->setChecked(false);
+        rightCount++;
     }
     else
         serial->write("!BLINK,R,OFF#\n");
@@ -228,7 +258,11 @@ void MainWindow::on_btnStart_clicked()
         ui->btnReverse->setEnabled(true);
         ui->btnLeft->setEnabled(true);
         ui->btnRight->setEnabled(true);
+        ui->slidespeed->setEnabled(true);
         ui->dialSpeed->setEnabled(true);
+        ui->dialSteering->setEnabled(true);
+        ui->btnhazards->setEnabled(true);
+        ui->btnKlaxon->setEnabled(true);
     }
     else
     {
@@ -270,7 +304,10 @@ void MainWindow::on_btnStop_clicked()
         ui->btnReverse->setEnabled(false);
         ui->btnLeft->setEnabled(false);
         ui->btnRight->setEnabled(false);
+        ui->slidespeed->setEnabled(false);
         ui->dialSpeed->setEnabled(false);
+        ui->dialSteering->setEnabled(false);
+
         qint64 seconds =
                 startTime.secsTo(endTime);
 
@@ -379,6 +416,7 @@ void MainWindow::closeEvent(QCloseEvent *event) {
         serial->close();
     }
 
+    serial->close();
     // 창 닫기 이벤트를 수락하여 프로그램을 최종적으로 종료시킴
     event->accept();
 }
