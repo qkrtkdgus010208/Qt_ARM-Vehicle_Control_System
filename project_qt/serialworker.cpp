@@ -45,6 +45,8 @@ void SerialWorker::openPort()
     serial->setFlowControl(QSerialPort::NoFlowControl);
 
     if (serial->open(QIODevice::ReadWrite)) {
+        // 포트 오픈 직전 드라이버/OS 레벨에 쌓여있던 수신 잔여 데이터 비우기
+        serial->clear(QSerialPort::AllDirections);
         qDebug() << "시리얼 포트 연결 성공:" << targetPort;
         emit connectionStatusChanged(true);
     } else {
