@@ -117,5 +117,8 @@
 
 ## 동작 동영상
 
-https://github.com/user-attachments/assets/02c82cbb-0edf-47b8-a4ab-1d00f37cc54f
+
+https://github.com/user-attachments/assets/e23b8202-c126-4254-a741-647ff3460128
+
+
 
