@@ -2,13 +2,11 @@
 
 <img width="1522" height="848" alt="image" src="https://github.com/user-attachments/assets/b6774df4-95da-4b87-a571-8b1e6f13cc96" />
 
-
 ## 프로젝트 개요
 
 ### 🚗 프로젝트 소개
 
 > QT GUI와 Cortex-M4를 UART로 연동하여 차량의 주행과 조향을 원격 제어하고, 카메라 및 차량 내부 환경 정보를 실시간 모니터링하는 스마트 시스템
-
 
 | 항목 | 내용 |
 | --- | --- |
@@ -22,15 +20,17 @@
 | **Actuator** | DC Motor / Servo Motor / LED |
 | **영상** | Camera + QT |
 
----
 ### 팀 구성
 
-고지현, 곽혜민, 김경태, 박상현
+- 박상현
+- 고지현
+- 곽혜민
+- 김경태
 
 ---
 
 ## 주요 기능
-주요 기능
+
 -	차량 ON/OFF 제어
 -	차량 카메라 영상 표시 
 -	전진 / 중립/ 후진 기어 제어
@@ -40,13 +40,14 @@
 -	차량 온도 및 습도 표시 
 -	속도 및 주행 시간 표시
 
-
+---
 
 ## 시스템 요구 사항
 <img width="416" height="824" alt="image" src="https://github.com/user-attachments/assets/e0da80e4-e0c6-4750-aabb-3cda305885bf" />
 
 ---
-### 기능 요구사항
+
+## 기능 요구사항
 
 **차량 제어**
 -	ON 버튼을 누르면 차량 제어 시스템을 활성화한다. 
@@ -70,10 +71,12 @@
 -	Qt 에서 차량 제어 명령을 UART로 STM32에 전달한다. 
 -	STM32에서 차량 상태 정보를 UART로 Qt에 전달한다.
 
-## 화면 구성
+## UI 구성
+
+### 화면 구성
 <img width="1521" height="848" alt="image" src="https://github.com/user-attachments/assets/370b9d21-ea4d-4c14-87c4-45556860bdfa" />
 
-### 위젯구성
+### 위젯 구성
 
 |화면 요소|	Qt Widget	|용도|
 |---|---|---|
@@ -83,8 +86,6 @@
 |F / N / B |	QPushButton (Checkable)	모드 변경 |
 |Accelerator|	QSlider|	Motor PWM 조절|
 |Handle , L / R , Speed	|QDial , QPushButton|	핸들 표시, 조향 제어|
-
----
 
 ### Dialog
 >  주행 종료시 해당 주행의 정보를 확인 할 수 있는 **Drive Log Dialog**를 표시
@@ -102,8 +103,6 @@
 |**temp**| 차량 내부 온도|
 |**humidity**|차량 내부 습도|
 
----
-
 ### Message Box
 <img width="294" height="110" alt="스크린샷 2026-08-19 103727" src="https://github.com/user-attachments/assets/b2b7fd46-5172-45e6-a08e-ed6374ab915e" />
 
@@ -115,10 +114,12 @@
 
 ---
 
-## 동작 동영상
-
+## 동작 영상
 
 https://github.com/user-attachments/assets/e23b8202-c126-4254-a741-647ff3460128
 
+---
 
+## 하드웨어 구성
 
+<img width="802" height="410" alt="스크린샷 2026-08-19 114632" src="https://github.com/user-attachments/assets/2df6c8a5-962d-41ac-b271-7b786aeac66c" />
