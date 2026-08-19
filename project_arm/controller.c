@@ -34,3 +34,9 @@ void Motor_Controller(void)
         break;
     }
 }
+
+void Servo_Motor_Controller(void)
+{
+    TIM3_Out_PWM_Generation(50, cur_servo_motor_speed);
+    TIM2_Delay(10);
+}

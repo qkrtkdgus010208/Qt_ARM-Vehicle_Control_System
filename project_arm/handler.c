@@ -1,5 +1,6 @@
 #include "device_driver.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 #define TIMEOUT 1000
 
@@ -7,64 +8,109 @@ void Handler(void)
 {
     Key_Handler();
     UART_Handler();
+    Timer_Handler();
 }
 
 void Key_Handler(void)
 {
-    static unsigned char stop = 0;
+    // static unsigned char stop = 0;
 
-    if (Key_Pressed)
-    {
-        Key_Pressed = 0;
-        TIM4_Interrupt_Enable(1, 1, TIMEOUT);
-    }
-    else if (Key_Released)
-    {
-        Key_Released = 0;
-        TIM4_Stop();
+    // if (Key_Pressed)
+    // {
+    //     Key_Pressed = 0;
+    //     TIM4_Interrupt_Enable(1, 1, TIMEOUT);
+    // }
+    // else if (Key_Released)
+    // {
+    //     Key_Released = 0;
+    //     TIM4_Stop();
 
-        if (stop)
-        {
-            stop = 0;
-            return;
-        }
+    //     if (stop)
+    //     {
+    //         stop = 0;
+    //         return;
+    //     }
 
-        cur_motor_state = (cur_motor_state == CW) ? CCW : CW;
-    }
+    //     cur_motor_state = (cur_motor_state == CW) ? CCW : CW;
+    // }
 
-    if (TIM4_Expired)
-    {
-        TIM4_Expired = 0;
-        stop = 1;
-        cur_motor_state = STOP;
-    }
+    // if (TIM4_Expired)
+    // {
+    //     TIM4_Expired = 0;
+    //     stop = 1;
+    //     cur_motor_state = STOP;
+    // }
 }
 
 void UART_Handler(void)
 {
-    if (!Uart_Data_In) return;
+    if (!Uart_Data_In)
+        return;
 
     Uart_Data_In = 0;
-    char c = Uart_Data;
 
-    if (c == 'S')
+    char header = rx_buf[0];      // 첫 글자 식별자 ('A', 'S' 등)
+    int value = atoi(&rx_buf[1]); // 뒤의 숫자 문자열을 정수로 변환
+
+    switch (header)
     {
-        cur_motor_state = STOP;
-        printf("%c\n", c);
+    case 'D': // 방향 제어 ('F', 'R', 'S')
+        if (rx_buf[1] == 'F')
+            cur_motor_state = CW;
+        else if (rx_buf[1] == 'R')
+            cur_motor_state = CCW;
+        else if (rx_buf[1] == 'S')
+            cur_motor_state = STOP;
+        break;
+
+    case 'S': // DC 모터 속도 명령 (0 ~ 200)
+        cur_motor_speed = value;
+        break;
+
+    case 'A': // 입력 범위 제한 (-90 ~ +90도)
+        if (value < -90)
+            value = -90;
+        if (value > 90)
+            value = 90;
+
+        // -90도 -> 135, 0도 -> 85, +90도 -> 35 변환 공식
+        cur_servo_motor_speed = 85 - ((value * 100) / 180);
+        break;
+
+    case 'F': // 좌우 및 비상 깜빡이
+        if (rx_buf[1] == 'L')
+        {
+            LED_Left_On = !LED_Left_On;
+            LED_Left_Toggle();
+        }
+        else if (rx_buf[1] == 'R')
+        {
+            LED_Right_On = !LED_Right_On;
+            LED_Right_Toggle();
+        }
+        else if (rx_buf[1] == 'E')
+        {
+            LED_Emergency_On = !LED_Emergency_On;
+            LED_Emergency_Toggle();
+        }
+
+    default:
+        break;
     }
-    else if (c == 'F')
+}
+
+void Timer_Handler()
+{
+    if (TIM4_Expired)
     {
-        cur_motor_state = CW;
-        printf("%c\n", c);
-    }
-    else if (c == 'R')
-    {
-        cur_motor_state = CCW;
-        printf("%c\n", c);
-    }
-    else if (c >= '1' && c <= '9')
-    {
-        cur_motor_speed = c - '0';
-        printf("%c\n", c);
-    }
+        TIM4_Expired = 0;
+        DHT11_Controller();
+        
+        if (LED_Left_On)
+            LED_Left_Toggle();
+        else if (LED_Right_On)
+            LED_Right_Toggle();
+        else if (LED_Emergency_On)
+            LED_Emergency_Toggle();
+    }   
 }

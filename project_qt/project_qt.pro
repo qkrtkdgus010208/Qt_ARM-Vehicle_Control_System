@@ -1,4 +1,6 @@
 QT += widgets
+QT += core gui multimedia multimediawidgets
+QT += serialport
 
 CONFIG += c++17
 
@@ -7,16 +9,32 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    drivelog.cpp \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    camerathread.cpp \
+    serialworker.cpp \
+    speeddial.cpp \
+    steeringwheel.cpp
 
 HEADERS += \
-    mainwindow.h
+    drivelog.h \
+    mainwindow.h \
+    camerathread.h \
+    serialworker.h \
+    speeddial.h \
+    steeringwheel.h
 
 FORMS += \
+    drivelog.ui \
     mainwindow.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    myresource.qrc
+
+DISTFILES +=

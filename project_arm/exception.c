@@ -26,8 +26,22 @@ void EXTI15_10_IRQHandler(void)
 
 void USART2_IRQHandler(void)
 {
-	Uart_Data_In = 1;
-	Uart_Data = (unsigned char)USART2->DR;
+	char c = (unsigned char)USART2->DR;
+
+	if (c == '\n')
+        {
+            rx_buf[rx_idx] = '\0'; // 문자열 끝 완성 ("A90\0")
+            rx_idx = 0;
+            Uart_Data_In = 1; // 메인 루프에 패킷 수신 완료 알림
+        }
+        else if (c != '\r') // 캐리지 리턴 문자 무시
+        {
+            if (rx_idx < sizeof(rx_buf) - 1)
+            {
+                rx_buf[rx_idx++] = c;
+            }
+        }
+
 	NVIC_ClearPendingIRQ(38);
 }
 

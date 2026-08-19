@@ -23,12 +23,18 @@ extern int SysTick_Check_Timeout(void);
 extern unsigned int SysTick_Get_Time(void);
 extern unsigned int SysTick_Get_Load_Time(void);
 extern void SysTick_Stop(void);
+extern void SysTick_Delay_Us(unsigned int usec);
+extern void SysTick_Delay_Ms(unsigned int msec);
 
 // Led.c
 
 extern void LED_Init(void);
 extern void LED_On(void);
 extern void LED_Off(void);
+extern void LED_Left_Toggle(void);
+extern void LED_Right_Toggle(void);
+extern void LED_Emergency_Toggle(void);
+extern void LED_All_Off(void);
 
 // Clock.c
 
@@ -47,6 +53,7 @@ extern void Key_ISR_Enable(int en);
 extern void TIM2_Delay(int time);
 extern void TIM2_Stopwatch_Start(void);
 extern unsigned int TIM2_Stopwatch_Stop(void);
+extern void TIM4_Delay_Us(int time_us);
 extern void TIM4_Repeat(int time);
 extern int TIM4_Check_Timeout(void);
 extern void TIM4_Stop(void);
@@ -67,22 +74,29 @@ extern void MOTOR_Stop(void);
 extern void MOTOR_CW(void);
 extern void MOTOR_CCW(void);
 
+// DHT11.c
+
+void DHT11_Controller(void);
+
 // Handler.c
 
 extern void Handler(void);
 extern void Key_Handler(void);
 extern void UART_Handler(void);
+extern void Timer_Handler(void);
 
-// state_manager.c
+// State_manager.c
 
 extern void State_Management(void);
 extern void Motor_State_Management(void);
+extern void Servo_Motor_State_Management(void);
 
-// controller.c
+// Controller.c
 
 extern void Motor_Controller(void);
+extern void Servo_Motor_Controller(void);
 
-// variable
+// Variable
 
 typedef enum {
     STOP = 0,
@@ -90,13 +104,35 @@ typedef enum {
     CCW,
 } Motor_State_t;
 
+enum {
+    START = 0,
+    RIGHT = 35,
+    FRONT = 85,
+    LEFT  = 135
+};
+
+typedef enum
+{
+    OK, 
+    STARTUP_TIMEOUT, 
+    DATA_TIMEOUT, 
+    CHECKSUM_ERROR
+} DHT11_State_t;
+
 extern Motor_State_t prev_motor_state;
 extern Motor_State_t cur_motor_state;
 extern unsigned char prev_motor_speed;
 extern unsigned char cur_motor_speed;
+extern unsigned char prev_servo_motor_speed;
+extern unsigned char cur_servo_motor_speed;
+extern unsigned char LED_Left_On;
+extern unsigned char LED_Right_On;
+extern unsigned char LED_Emergency_On;
 
 extern volatile unsigned char Key_Pressed;
 extern volatile unsigned char Key_Released;
 extern volatile unsigned char Uart_Data_In;
 extern volatile unsigned char Uart_Data;
 extern volatile unsigned char TIM4_Expired;
+extern char rx_buf[32];
+extern volatile unsigned char rx_idx;
