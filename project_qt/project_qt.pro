@@ -13,6 +13,7 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     camerathread.cpp \
+    serialworker.cpp \
     speeddial.cpp \
     steeringwheel.cpp
 
@@ -20,6 +21,7 @@ HEADERS += \
     drivelog.h \
     mainwindow.h \
     camerathread.h \
+    serialworker.h \
     speeddial.h \
     steeringwheel.h
 
